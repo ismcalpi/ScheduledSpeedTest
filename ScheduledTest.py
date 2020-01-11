@@ -2,8 +2,13 @@ import speedtest
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import time
+from datetime import datetime
 
 threads = 0
+
+
+def b_to_mb(b):
+    return round(b/1000000)
 
 
 def execute_test():
@@ -13,19 +18,20 @@ def execute_test():
     s.upload(threads=threads)
 
     results = s.results.dict()
-    download = results['download'] * .000001
-    upload = results['upload'] * .000001
+    download = results['download']
+    upload = results['upload']
     ping = results['ping']
     server = results['server']['host']
-    timestamp = results['timestamp']
+    now = datetime.now()
+    timestamp = now.strftime("%m/%d/%Y %H:%M:%S")
 
-    save_output(timestamp, download, upload, ping, server)
+    save_output(timestamp, b_to_mb(download), b_to_mb(upload), round(ping), server)
 
 
 def save_output(timestamp, download, upload, ping, server):
-    output_path = "{0}/output.csv".format(os.path.dirname(os.path.realpath(__file__)))
+    output_path = "{0}/output.txt".format(os.path.dirname(os.path.realpath(__file__)))
     line = "{0},{1},{2},{3},{4}\n".format(timestamp, download, upload, ping, server)
-    with open(output_path, "a") as f:
+    with open(output_path, 'a') as f:
         f.write(line)
         print(line)
 
